@@ -4,9 +4,10 @@ import pandas as pd
 import yfinance as yf
 import datetime
 import matplotlib.pyplot as plt
+import seaborn as sns
 
 st.set_page_config(page_title='Pairs Trading')
-
+sns.set_style('darkgrid')
 st.title('Pairs Trading for Popular US Stocks')
 
 options = st.selectbox('Pick trading pair to analyse',
