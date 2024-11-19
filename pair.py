@@ -81,7 +81,7 @@ with col3:
     ax4.plot(x.index, nx*[trading_range+risk], color='red',linestyle='--',label=f'stop loss for {tickers[1]}')
     ax4.plot(x.index, nx*[max(trading_range-risk*risk_reward,0)], color='green',linestyle='--',label=f'take profit for {tickers[1]}')
     ax4.plot(x.index, nx*[-trading_range], color='purple', linestyle='--',label=f'buy signal for {tickers[1]}')
-    ax4.plot(x.index, nx*[-trading_range-0.5], color='red',linestyle='--')
+    ax4.plot(x.index, nx*[-trading_range-risk], color='red',linestyle='--')
     ax4.plot(x.index, nx*[min(-(trading_range-risk*risk_reward),0)], color='green',linestyle='--')
     ax4.scatter(short.index,short,c='r',marker='o', s=20, label='short zone')
     ax4.scatter(long.index,long,c='orange',marker='o', s=20, label='buy zone')
