@@ -5,6 +5,8 @@ import yfinance as yf
 import datetime
 import matplotlib.pyplot as plt
 
+st.set_page_config(page_title='Pairs Trading', layout='wide')
+
 st.title('Pairs Trading for Popular US Stocks')
 
 options = st.selectbox('Pick trading pair to analyse',
@@ -21,16 +23,19 @@ end_date = date_end
 data = yf.download(tickers, start = start_date, end = end_date, progress=False)['Adj Close']
 x = data.iloc[:,0]
 y = data.iloc[:,1]
-fig, ax = plt.subplots()
-ax.plot(x.index, x, label=f'{tickers[0]}')
-ax.legend(loc='upper left')
-ax1 = ax.twinx()
-ax1.plot(y.index, y, color='r', label = f'{tickers[1]}')
-ax1.legend(loc='lower right')
-ax.set_title(f'Daily chart of {tickers[0]} vs {tickers[1]}')
-for tick in ax.get_xticklabels():
-    tick.set_rotation(45)
-st.pyplot(fig)
+col1, col2 = st.columns(2)
+
+with col1:
+    fig, ax = plt.subplots(figsize=(6,5))
+    ax.plot(x.index, x, label=f'{tickers[0]}')
+    ax.legend(loc='upper left')
+    ax1 = ax.twinx()
+    ax1.plot(y.index, y, color='r', label = f'{tickers[1]}')
+    ax1.legend(loc='lower right')
+    ax.set_title(f'Daily chart of {tickers[0]} vs {tickers[1]}')
+    for tick in ax.get_xticklabels():
+        tick.set_rotation(45)
+    st.pyplot(fig)
 
 nx = len(x)
 ny = len(y)
@@ -41,11 +46,12 @@ sxy = np.sum(x*y)-nx*xbar*ybar
 beta = sxy/sx2
 alpha = ybar-beta*xbar
 yhat = alpha+beta*x
-fig1, ax3 = plt.subplots()
-ax3.scatter(x,y, alpha = 0.5)
-ax3.plot(x,yhat, 'r')
-ax3.set_title(f'Scatter plot of {tickers[0]} vs {tickers[1]}')
-st.pyplot(fig1)
+with col2:
+    fig1, ax3 = plt.subplots(figsize=(6,5))
+    ax3.scatter(x,y, alpha = 0.5)
+    ax3.plot(x,yhat, 'r')
+    ax3.set_title(f'Scatter plot of {tickers[0]} vs {tickers[1]}')
+    st.pyplot(fig1)
 
 s = y - beta*x
 s_mean = (1/len(s))*np.sum(s)
@@ -66,22 +72,24 @@ dates_buy = s_z[(s_z<=-trading_range+0.05) & (s_z >=-trading_range -0.1)].index
 dates_stoploss = s_z[(s_z<=-trading_range-risk) | (s_z >=trading_range+risk)].index
 dates_tp = s_z[(s_z<=0.1 -trading_range+risk*risk_reward) & (s_z >=-trading_range+risk*risk_reward-0.05) | (s_z>=trading_range-risk*risk_reward-0.1) & (s_z <=trading_range-risk*risk_reward+0.05)].index
 
-fig2, ax4 = plt.subplots()
-ax4.plot(x.index, s_z)
-ax4.plot(x.index, nx*[trading_range], color='orange', linestyle='--',label=f'short signal for {tickers[1]}')
-ax4.plot(x.index, nx*[trading_range+risk], color='red',linestyle='--',label=f'stop loss for {tickers[1]}')
-ax4.plot(x.index, nx*[max(trading_range-risk*risk_reward,0)], color='green',linestyle='--',label=f'take profit for {tickers[1]}')
-ax4.plot(x.index, nx*[-trading_range], color='purple', linestyle='--',label=f'buy signal for {tickers[1]}')
-ax4.plot(x.index, nx*[-trading_range-0.5], color='red',linestyle='--')
-ax4.plot(x.index, nx*[min(-(trading_range-risk*risk_reward),0)], color='green',linestyle='--')
-ax4.scatter(short.index,short,c='r',marker='o', s=20, label='short zone')
-ax4.scatter(long.index,long,c='orange',marker='o', s=20, label='buy zone')
-ax4.legend(bbox_to_anchor = (0.4,-0.15))
+col3, col4 = st.columns(2)
+with col3:
+    fig2, ax4 = plt.subplots()
+    ax4.plot(x.index, s_z)
+    ax4.plot(x.index, nx*[trading_range], color='orange', linestyle='--',label=f'short signal for {tickers[1]}')
+    ax4.plot(x.index, nx*[trading_range+risk], color='red',linestyle='--',label=f'stop loss for {tickers[1]}')
+    ax4.plot(x.index, nx*[max(trading_range-risk*risk_reward,0)], color='green',linestyle='--',label=f'take profit for {tickers[1]}')
+    ax4.plot(x.index, nx*[-trading_range], color='purple', linestyle='--',label=f'buy signal for {tickers[1]}')
+    ax4.plot(x.index, nx*[-trading_range-0.5], color='red',linestyle='--')
+    ax4.plot(x.index, nx*[min(-(trading_range-risk*risk_reward),0)], color='green',linestyle='--')
+    ax4.scatter(short.index,short,c='r',marker='o', s=20, label='short zone')
+    ax4.scatter(long.index,long,c='orange',marker='o', s=20, label='buy zone')
+    ax4.legend(bbox_to_anchor = (0.4,-0.15))
 
-ax4.set_title('Signals chart')
-for tick in ax4.get_xticklabels():
-    tick.set_rotation(45)
-st.pyplot(fig2)
+    ax4.set_title('Signals chart')
+    for tick in ax4.get_xticklabels():
+        tick.set_rotation(45)
+    st.pyplot(fig2)
 
 
 
@@ -121,11 +129,14 @@ for date, row in data.iterrows():
     portfolio_changes.append({'Date':date, 'Portfolio':portfolio})
 
 port_df = pd.DataFrame(portfolio_changes).set_index('Date')
-fig3, ax5 = plt.subplots()
-ax5.plot(port_df.index, port_df)
-ax5.set_title(f'Profit per share of {tickers[1]}')
-for tick in ax5.get_xticklabels():
-    tick.set_rotation(45)
-st.pyplot(fig3)
-st.write('Total profit is profit per share x number of shares bought or shorted.')
+
+with col4:
+    fig3, ax5 = plt.subplots()
+    ax5.plot(port_df.index, port_df)
+    ax5.set_title(f'Profit per share of {tickers[1]}')
+    for tick in ax5.get_xticklabels():
+        tick.set_rotation(45)
+    st.pyplot(fig3)
+    st.write('Total profit is profit per share x number of shares bought or shorted.')
+
 st.write('This is version 1 of the app')
