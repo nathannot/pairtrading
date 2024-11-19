@@ -101,13 +101,13 @@ for date, row in data.iterrows():
     signal = row['signal']
 
     if signal == 1:
-        positions[tickers[0]] -= 1
+        positions[tickers[0]] -= round(beta)
         positions[tickers[1]] += 1
-        cash += price1 - price2
+        cash += price1*round(beta) - price2
     elif signal == -1:
-        positions[tickers[0]] += 1
+        positions[tickers[0]] += round(beta)
         positions[tickers[1]] -= 1
-        cash += price2 - price1
+        cash += price2 - price1*round(beta)
     elif signal == 'stop loss':
         cash += positions[tickers[0]]*price1+positions[tickers[1]]*price2
         positions = {tickers[0]:0, tickers[1]:0}
@@ -121,7 +121,7 @@ for date, row in data.iterrows():
 port_df = pd.DataFrame(portfolio_changes).set_index('Date')
 fig3, ax5 = plt.subplots()
 ax5.plot(port_df.index, port_df)
-ax5.set_title('Profit per share')
+ax5.set_title(f'Profit per share of {tickers[1]}')
 for tick in ax5.get_xticklabels():
     tick.set_rotation(45)
 st.pyplot(fig3)
