@@ -15,7 +15,7 @@ mappings = {'Amazon vs Walmart':['AMZN','WMT'], 'Nvidia vs AMD':['NVDA','AMD'],'
 tickers = mappings[options]
 date_start = st.date_input('Enter start Date', min_value = datetime.date(2010,1,1), value = datetime.date(2016,1,1))
 date_end = st.date_input('Enter Finish Date', min_value = datetime.date(2010,1,1), value = datetime.date(2021,1,1))
-st.write('Make sure start date is before end date or you will get an error')
+st.write('Make sure start date is before end date otherwise you will get an error')
 start_date = date_start
 end_date = date_end
 data = yf.download(tickers, start = start_date, end = end_date, progress=False)['Adj Close']
@@ -59,8 +59,13 @@ st.write('1.5 indicates higher risk, 2.5 indicates lower risk')
 risk = st.slider('Select your stop loss level', min_value = 0.2, max_value = 2.0, value=0.5)
 risk_reward = st.slider('Select your desired risk to reward', min_value = 1.0, max_value = 4.0, value=2.0)
 
-short = s_z[s_z>trading_range]
-long = s_z[s_z<-trading_range]
+short = s_z[(s_z>=trading_range-0.05) & (s_z <=trading_range+0.1)]
+long = s_z[(s_z<=-trading_range+0.05) & (s_z >=-trading_range -0.1)]
+dates_sell = s_z[(s_z>=trading_range-0.05) & (s_z <=trading_range+0.1)].index
+dates_buy = s_z[(s_z<=-trading_range+0.05) & (s_z >=-trading_range -0.1)].index
+dates_stoploss = s_z[(s_z<=-trading_range-risk) | (s_z >=trading_range+risk)].index
+dates_tp = s_z[(s_z<=0.1 -trading_range+risk*risk_reward) & (s_z >=-trading_range+risk*risk_reward-0.05) | (s_z>=trading_range-risk*risk_reward-0.1) & (s_z <=trading_range-risk*risk_reward+0.05)].index
+
 fig2, ax4 = plt.subplots()
 ax4.plot(x.index, s_z)
 ax4.plot(x.index, nx*[trading_range], color='orange', linestyle='--',label=f'short signal for {tickers[1]}')
@@ -69,19 +74,16 @@ ax4.plot(x.index, nx*[max(trading_range-risk*risk_reward,0)], color='green',line
 ax4.plot(x.index, nx*[-trading_range], color='purple', linestyle='--',label=f'buy signal for {tickers[1]}')
 ax4.plot(x.index, nx*[-trading_range-0.5], color='red',linestyle='--')
 ax4.plot(x.index, nx*[min(-(trading_range-risk*risk_reward),0)], color='green',linestyle='--')
-ax4.legend(bbox_to_anchor = (1.05,1))
-ax4.scatter(short.index,short,c='r',marker='o', s=10)
-ax4.scatter(long.index,long,c='r',marker='o', s=10)
+ax4.scatter(short.index,short,c='r',marker='o', s=20, label='short zone')
+ax4.scatter(long.index,long,c='orange',marker='o', s=20, label='buy zone')
+ax4.legend(bbox_to_anchor = (0.4,-0.15))
+
 ax4.set_title('Signals chart')
 for tick in ax4.get_xticklabels():
     tick.set_rotation(45)
 st.pyplot(fig2)
 
 
-dates_sell = s_z[(s_z>=trading_range-0.05) & (s_z <=trading_range+0.1)].index
-dates_buy = s_z[(s_z<=-trading_range+0.05) & (s_z >=-trading_range -0.1)].index
-dates_stoploss = s_z[(s_z<=-trading_range-risk) | (s_z >=trading_range+risk)].index
-dates_tp = s_z[(s_z<=0.1 -trading_range+risk*risk_reward) & (s_z >=-trading_range+risk*risk_reward-0.05) | (s_z>=trading_range-risk*risk_reward-0.1) & (s_z <=trading_range-risk*risk_reward+0.05)].index
 
 initial_portfolio = 1
 portfolio = initial_portfolio
@@ -125,5 +127,5 @@ ax5.set_title(f'Profit per share of {tickers[1]}')
 for tick in ax5.get_xticklabels():
     tick.set_rotation(45)
 st.pyplot(fig3)
-st.write('Total profit is profit per share x number of shares bought')
+st.write('Total profit is profit per share x number of shares bought or shorted.')
 st.write('This is version 1 of the app')
