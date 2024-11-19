@@ -5,7 +5,7 @@ import yfinance as yf
 import datetime
 import matplotlib.pyplot as plt
 
-st.set_page_config(page_title='Pairs Trading', layout='wide')
+st.set_page_config(page_title='Pairs Trading')
 
 st.title('Pairs Trading for Popular US Stocks')
 
