@@ -15,7 +15,7 @@ mappings = {'Amazon vs Walmart':['AMZN','WMT'], 'Nvidia vs AMD':['NVDA','AMD'],'
 tickers = mappings[options]
 date_start = st.date_input('Enter start Date', min_value = datetime.date(2010,1,1), value = datetime.date(2016,1,1))
 date_end = st.date_input('Enter Finish Date', min_value = datetime.date(2010,1,1), value = datetime.date(2021,1,1))
-
+st.write('Make sure start date is before end date or you will get an error')
 start_date = date_start
 end_date = date_end
 data = yf.download(tickers, start = start_date, end = end_date, progress=False)['Adj Close']
