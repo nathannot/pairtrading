@@ -21,7 +21,7 @@ date_end = st.date_input('Enter Finish Date', min_value = datetime.date(2010,1,1
 st.write('Make sure start date is before end date otherwise you will get an error')
 start_date = date_start
 end_date = date_end
-data = yf.download(tickers, start = start_date, end = end_date, progress=False)['Close']
+data = yf.download(tickers, start = start_date, end = end_date, progress=False,multi_level_index=False)['Close']
 x = data.iloc[:,0]
 y = data.iloc[:,1]
 col1, col2 = st.columns(2)
